@@ -1,0 +1,678 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="zine.css" rel="stylesheet">
+    <style>
+    /*@import url('https://fonts.googleapis.com/css2?family=Comforter+Brush&display=swap');*/
+		@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap');
+    h1, span, p { font-family: "Cormorant Garamond", serif; }
+		h1 { margin: 3mm 0; }
+		
+.checkbox-line {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.checkbox-line input[type="checkbox"] {
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.checkbox-line .underline {
+  flex-grow: 1;
+  height: 1px;
+  background: #000;
+  opacity: 0.5;
+}
+
+
+
+  .breadcrumbs {
+    --box: 16px;           /* square size */
+    --gap: 6px;            /* spacing */
+    --stroke: 2px;         /* border width */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--box), 1fr));
+    gap: var(--gap);
+    max-width: 100%;
+	margin: 0.5em 0;
+  }
+  .crumb {
+    width: var(--box);
+    height: var(--box);
+    border: var(--stroke) solid #111;
+    display: inline-grid;
+    place-items: center;
+    aspect-ratio: 1/1; /* keeps square if width is constrained */
+    position: relative;
+    print-color-adjust: exact;
+  }
+  /* Normal check squares (user ticks these by hand on paper) */
+  .crumb[data-type="square"]::after { content: ""; }
+
+  /* Bonus styles: border tweaks + icon glyphs (emoji = print-safe) */
+  .crumb[data-type="star"] {
+    border-style: dashed;
+  }
+  .crumb[data-type="star"]::after {
+    content: "★";
+    font-size: calc(var(--box) * 0.8);
+    line-height: 1;
+  }
+
+  .crumb[data-type="dice"] {
+    border-style: dotted;
+  }
+  .crumb[data-type="dice"]::after {
+    content: "";
+    font-size: calc(var(--box) * 0.8);
+    line-height: 1;
+  }
+  
+    .crumb[data-type="empty"] {
+    border-style: solid;
+  }
+  .crumb[data-type="empty"]::after {
+    content: "";
+    font-size: calc(var(--box) * 0.8);
+    line-height: 1;
+  }
+
+
+/* Achievement line */
+.achievement {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4em;
+  margin: 0.3em 0;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.achievement .crumb {
+  width: var(--box, 16px);
+  height: var(--box, 16px);
+  flex-shrink: 0;
+}
+
+/* Optional text styling */
+.ach-text {
+  font-family: inherit;
+  font-size: 0.95em;
+  line-height: 1.2;
+}
+
+/* the underline filler */
+.bonus-line {
+  flex-grow: 1;                   /* fills remaining horizontal space */
+  border-bottom: 1px solid #000;  /* the underline itself */
+  margin-left: 0.4em;             /* small space after text */
+}
+
+
+
+/* Back Page Tally */
+/* Minimal tally styles — stable on screen & print */
+.tally-simple { margin: 1em 0; }
+.tally-simple h3 { margin: 0 0 .4em 0; font-size: 1em; }
+
+.tally-table {
+  width: 100%;
+  table-layout: fixed;     /* lock column widths */
+  border-collapse: collapse;
+  font-size: 0.95em;
+  margin: .2em 0 .6em 0;
+}
+
+.tally-table thead th {
+  text-align: left;
+  white-space: nowrap;
+  padding: 0 0 .25em 0;
+  color: #000;
+}
+
+.tally-table td {
+  padding: 0.2em;              /* we draw the “writing line” with a span */
+  height: 1.2em;           /* row height */
+  vertical-align: bottom;
+}
+
+.line {
+  display: block;
+  width: 100%;
+  border-bottom: 1px solid #000;
+  padding-top: .6em;       /* handwriting space */
+}
+
+.total {
+  display: flex;
+  align-items: flex-end;
+  gap: .5em;
+  margin: .4em 0 .6em;
+}
+
+.total .gt-line {
+  flex: 1;
+  border-bottom: 1px solid #000;
+}
+
+
+/* front page tasks */
+.frontpage-tasks {
+  margin: 1em 0;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.front-title {
+  font-size: 1em;
+  font-weight: 700;
+  margin-bottom: 0.4em;
+}
+
+/* container */
+.task-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em; /* vertical spacing between rows */
+}
+
+/* each row = short + long underline */
+.task-row {
+  display: flex;
+  min-height: 1.2em;
+  align-items: center;
+  gap: 0.5em;
+}
+
+/* the small space for difficulty number */
+.short-line {
+  display: inline-block;
+  width: 1.2em;             /* small box for 1–5 */
+  border-bottom: 1px solid #000;
+  flex-shrink: 0;           /* stays fixed size */
+}
+
+/* the long underline for the task name */
+.long-line {
+  display: inline-block;
+  flex-grow: 1;
+  border-bottom: 1px solid #000;
+}
+
+
+
+/* ---- Fix breadcrumb layout when printing with zserge/zine.css ---- */
+@media print {
+  /* 1) Avoid fr-units in print; use fixed-size, wrapping boxes */
+  .breadcrumbs {
+    display: inline-flex !important;    /* switch from grid to flex for print */
+    flex-wrap: wrap !important;
+    gap: 4pt !important;                 /* print-friendly units */
+    width: 100% !important;
+    box-sizing: border-box !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* 2) Fixed box size & borders in points so they’re crisp on paper */
+  .crumb {
+    width: 12pt !important;
+    height: 12pt !important;
+    border-width: 2pt !important;
+    flex: 0 0 auto !important;          /* prevent flex growth/shrink */
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* 3) Emoji/SVG sizing for print */
+  .crumb::after { 
+    font-size: 10pt !important;
+    line-height: 1 !important;
+  }
+
+  /* 4) Help Chrome keep vector edges dark */
+  .breadcrumbs, .crumb {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+    .achievement { gap: 3pt; }
+  .achievement .crumb {
+    width: 12pt;
+    height: 12pt;
+    border-width: 1pt;
+  }
+  .ach-text {
+    font-size: 9pt;
+  }
+  
+    .bonus-line {
+    border-bottom-width: 0.75pt;
+  }
+   
+
+  .task-lines { gap: 5pt; }
+  .short-line {
+    width: 10pt;
+    border-bottom-width: 0.75pt;
+  }
+  .long-line {
+    border-bottom-width: 0.75pt;
+  }
+  
+  
+  .tally-table { font-size: 12pt; }
+  .tally-table td { height: 16pt; }
+  .line, .gt-line { border-bottom-width: .75pt; }
+  .line { padding-top: 6pt; }
+  .total { gap: 4pt; margin: 4pt 0 6pt; }
+  
+  
+  
+  }
+
+
+    </style>
+    <title>TasQuest</title>
+  </head>
+  <body>
+    <main class="zine">
+      <article style="display:block; padding: 3mm; height: 105mm; width: 75mm; ">
+        <h1 style="display: flex; justify-content: center; align-items: center;">TasQuest</h1>
+			<section class="frontpage-tasks">
+			  <p>write 5 tasks, then order by difficulty</p>
+			  <br>
+
+			  <div class="task-lines">
+				<!-- 5 rows -->
+				<div class="task-row"><span class="short-line"></span><span class="long-line"></span></div>
+				<div class="task-row"><span class="short-line"></span><span class="long-line"></span></div>
+				<div class="task-row"><span class="short-line"></span><span class="long-line"></span></div>
+				<div class="task-row"><span class="short-line"></span><span class="long-line"></span></div>
+				<div class="task-row"><span class="short-line"></span><span class="long-line"></span></div>
+			  </div>
+</section>
+				<p><em>Flavor Text + img Here?</em></p>
+				<br>
+				<br>
+				<p><b>Win Condition: Fancy Potion - multiply next game's total bonus points by 1.25. single use</b></p>
+      </article>
+      <article style="display:block; padding: 3mm; height: 105mm; width: 75mm; ">
+				<h2>Task #1</h2>
+				<p>Sub-tasks:</p>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+				<p>Breadcrumbs - 5 minute blocks:</p>
+					<div class="breadcrumbs"
+					 data-count="12"
+					 data-stars="2"
+					 data-dice="1"
+					 data-seed="T1-FOX-123">
+					</div>
+				<h3>Bonus Area</h3>
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Under Target Time +2TP</span>
+					</div>
+
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">No Distractions +2TP</span>
+					</div>
+
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Sub Task +2BP</span>
+					  <span class="bonus-line"></span>
+					</div>
+				<p>On task complete: Random Modifier card:</p>
+				<p><em>Double the next task's Tick Point score</em></p>
+				<p><em>Flavor Text + Image</em></p>
+      </article>
+      <article style="display:block; padding: 3mm; height: 105mm; width: 75mm; ">
+				<h2>Task #2</h2>
+				<p>Sub-tasks:</p>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+				<p>Breadcrumbs - 5 minute blocks:</p>
+					<div class="breadcrumbs"
+					 data-count="12"
+					 data-stars="2"
+					 data-dice="1"
+					 data-seed="T2-FOX-123">
+					</div>
+				<h3>Bonus Area</h3>
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Under Target Time +2TP</span>
+					</div>
+
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">No Distractions +2TP</span>
+					</div>
+
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Sub Task +2BP</span>
+					  <span class="bonus-line"></span>
+					</div>
+				<p>On task complete: Random Modifier card:</p>
+				<p><em>Copy the previous task's Modifier card</em></p>
+				<p><em>Flavor Text + Image</em></p>
+      </article>
+      <article style="display:block; padding: 3mm; height: 105mm; width: 75mm; ">
+				<h2>Task #3</h2>
+				<p>Sub-tasks:</p>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+				<p>Breadcrumbs - 5 minute blocks:</p>
+					<div class="breadcrumbs"
+					 data-count="12"
+					 data-stars="3"
+					 data-dice="1"
+					 data-seed="T3-FOX-123">
+					</div>
+				<h3>Bonus Area</h3>
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Under Target Time +2TP</span>
+					</div>
+
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">No Distractions +2TP</span>
+					</div>
+
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Sub Task +2BP</span>
+					  <span class="bonus-line"></span>
+					</div>
+				<p>On task complete: Random Modifier card:</p>
+				<p><em>Future bonus points are converted to tick points</em></p>
+				<p><em>Flavor Text + Image</em></p>
+      </article>
+      <article style="display:block; padding: 3mm; height: 105mm; width: 75mm; ">
+				<h2>Task #4</h2>
+				<p>Sub-tasks:</p>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+				<p>Breadcrumbs - 5 minute blocks:</p>
+					<div class="breadcrumbs"
+					 data-count="12"
+					 data-stars="3"
+					 data-dice="2"
+					 data-seed="T4-FOX-123">
+					</div>
+				<h3>Bonus Area</h3>
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Under Target Time +2TP</span>
+					</div>
+
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">No Distractions +2TP</span>
+					</div>
+
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Sub Task +2BP</span>
+					  <span class="bonus-line"></span>
+					</div>
+				<p>On task complete: Random Modifier card:</p>
+				<p><em>Swap Bonus Points and Tick Points on next task</em></p>
+				<p><em>Flavor Text + Image</em></p>
+      </article>
+      <article style="display:block; padding: 3mm; height: 105mm; width: 75mm; ">
+				<h2>Task #5 - BOSS</h2>
+				<p>Sub-tasks:</p>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+					<div class="checkbox-line">
+					  <input type="checkbox">
+					  <span class="underline"></span>
+					</div>
+				<p>Breadcrumbs - 5 minute blocks:</p>
+					<div class="breadcrumbs"
+					 data-count="36"
+					 data-stars="6"
+					 data-dice="3"
+					 data-seed="T5-FOX-123">
+					</div>
+
+				<p><em>Flavor Text + Image</em></p>
+      </article>
+      <article style="display:block; padding: 3mm; height: 105mm; width: 75mm; ">
+				<h1>Boss Bonus</h1>
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Under Target Time +2TP</span>
+					</div>
+
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">No Distractions +2TP</span>
+					</div>
+
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Sub Task +2BP</span>
+					  <span class="bonus-line"></span>
+					</div>
+					
+					<div class="achievement">
+					  <div class="crumb" data-type="empty"></div>
+					  <span class="ach-text">Sub Task +2BP</span>
+					  <span class="bonus-line"></span>
+					</div>
+				<p>On task complete: Random Modifier card:</p>
+				<p><em>Double bonus points from all previous rounds</em></p>
+				<p><em>Flavor Text + Image</em></p>
+      </article>
+      <article style="display:block; padding: 3mm; height: 105mm; width: 75mm; ">
+		<!-- Back Page: Score Tally -->
+<section class="tally-simple">
+  <h3>Score Tally – In Order of completion</h3>
+
+  <!-- TP table -->
+  <table class="tally-table" aria-label="TP Tally">
+    <colgroup>
+      <col style="width:18%">
+      <col style="width:20%">
+      <col style="width:22%">
+      <col style="width:30%">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Task #</th>
+        <th>TP</th>
+        <th>TP mod</th>
+        <th>TP Sub&nbsp;Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td></tr>
+      <tr><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td></tr>
+      <tr><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td></tr>
+      <tr><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td></tr>
+      <tr><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td></tr>
+    </tbody>
+  </table>
+
+  <p class="total"><span>TP Total:</span> <span class="gt-line"></span></p>
+
+  <!-- BP table (same columns; rename headers if you prefer) -->
+  <table class="tally-table" aria-label="BP Tally">
+    <colgroup>
+      <col style="width:18%">
+      <col style="width:20%">
+      <col style="width:22%">
+      <col style="width:30%">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Task #</th>
+        <th>BP</th>
+        <th>BP mod</th>
+        <th>BP Sub&nbsp;Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td></tr>
+      <tr><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td></tr>
+      <tr><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td></tr>
+      <tr><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td></tr>
+      <tr><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td><td><span class="line"></span></td></tr>
+    </tbody>
+  </table>
+
+  <p class="total"><span>BP Total:</span> <span class="gt-line"></span></p>
+  <p class="total"><span>Grand Total (TP + BP):</span> <span class="gt-line"></span></p>
+</section>
+
+      </article>
+    </main>
+  </body>
+  <script>
+  // --- Tiny deterministic RNG so the layout is repeatable from your zine seed ---
+  function xmur3(str) {
+    // 32-bit hashing of a string to seed the RNG
+    for (var i = 0, h = 1779033703 ^ str.length; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    return function() {
+      h = Math.imul(h ^ (h >>> 16), 2246822507);
+      h = Math.imul(h ^ (h >>> 13), 3266489909);
+      return (h ^= h >>> 16) >>> 0;
+    };
+  }
+  function mulberry32(a) {
+    return function() {
+      var t = (a += 0x6D2B79F5);
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function seededRand(seedStr) {
+    return mulberry32(xmur3(seedStr)());
+  }
+
+  // Pick k unique indices from [0..n-1] using the RNG
+  function pickUnique(rand, n, k, excludeSet = new Set()) {
+    const picks = new Set();
+    const limit = Math.max(0, Math.min(k, n - excludeSet.size));
+    while (picks.size < limit) {
+      const idx = Math.floor(rand() * n);
+      if (!excludeSet.has(idx)) picks.add(idx);
+    }
+    return picks;
+  }
+
+  function renderBreadcrumbs(el) {
+    const count = parseInt(el.dataset.count || "12", 10);
+    const nStar = parseInt(el.dataset.stars || "0", 10);
+    const nDice = parseInt(el.dataset.dice || "0", 10);
+    const seed = String(el.dataset.seed || "default-seed");
+
+    // Seeded randomness tied to count + a local salt so multiple strips differ
+    const salt = el.dataset.salt || "";
+    const rand = seededRand(`${seed}::breadcrumbs::${count}::${salt}`);
+
+    // Decide which indices are stars/dice (no overlap)
+    const starIdx = pickUnique(rand, count, nStar);
+    const diceIdx = pickUnique(rand, count, nDice, starIdx);
+
+    // Render boxes
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const div = document.createElement("div");
+      div.className = "crumb";
+      div.setAttribute("role", "img");
+      div.setAttribute("aria-label", "breadcrumb");
+      if (starIdx.has(i)) {
+        div.dataset.type = "star";
+        div.title = "Bonus: Star";
+      } else if (diceIdx.has(i)) {
+        div.dataset.type = "dice";
+        div.title = "Bonus: Dice";
+      } else {
+        div.dataset.type = "square";
+        div.title = "Task tick";
+      }
+      frag.appendChild(div);
+    }
+    el.replaceChildren(frag);
+  }
+
+  // Auto-render everything with .breadcrumbs
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".breadcrumbs").forEach(renderBreadcrumbs);
+  });
+</script>
+</html>
+
