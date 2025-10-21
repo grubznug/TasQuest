@@ -42,7 +42,7 @@
 
 @media print {
 	/* 8-page zine should be printed in landscape mode with no additional margins */
-	@page { size: landscape; margin: 0.1; bleed: 0; }
+	@page { size: landscape; margin: 0; bleed: 0; }
 	/* Zine has strange page ordering to make folding possible */
 	.zine { width: 100vw; height: 100vh; grid-template-areas: "p5 p4 p3 p2" "p6 p7 p8 p1"; }
 	/* Some pages have to be flipped 180 degrees */
